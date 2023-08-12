@@ -2,7 +2,7 @@
 
 ## Пример: 
 ```
-/view?question=Кто лучше? Выбери один из ответов&choices=Котики|Собачки|Антилопы ньялы&correctAnswer=2&imageURL=https://cdn.quasar.dev/img/parallax2.jpg
+/view?question=Кто лучше? Выбери один из ответов&choices=Котики|Собачки|Антилопы ньялы&imageURL=https://cdn.quasar.dev/img/parallax2.jpg
 ```
 ![изображение](https://github.com/dudava/survey-web-app/assets/121783360/fad8f2d9-ca1a-4b05-82a4-fa804ae7eb7a)
 
