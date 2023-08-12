@@ -1,6 +1,17 @@
-# Quasar App (survey-standalone)
+# /view/?... - просмотр опроса
 
-A Quasar Project
+## Пример: 
+```
+/view?question=Кто лучше? Выбери один из ответов&choices=Котики|Собачки|Антилопы ньялы&correctAnswer=2&imageURL=https://cdn.quasar.dev/img/parallax2.jpg
+```
+## Параметры: 
+**question** - вопрос <br>
+**choices** - варианты ответов через | без пробелов <br>
+**correctAnswer** - индекс правильного ответа (среди choices) начиная с нуля <br>
+**imageURL** - URL изображения для опроса <br>
+
+
+# Survey Web App Vue JS + Quasar (survey-standalone)
 
 ## Install the dependencies
 ```bash

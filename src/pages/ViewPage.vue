@@ -31,7 +31,7 @@ export default defineComponent({
     const queryParams = this.$route.query
     this.imageURL = queryParams.imageURL
     this.question = queryParams.question
-    this.choices = queryParams.choices.split(',')
+    this.choices = queryParams.choices.split('|')
     this.correctAnswer = this.choices[Number(queryParams.correctAnswer)]
     
   }
