@@ -25,6 +25,9 @@
 **correctAnswer** - индекс правильного ответа (среди choices) начиная с нуля <br>
 ...  и т.д
 
+## Создание нового опроса:
+![2023-08-14 00-44-11 (online-video-cutter com)](https://github.com/dudava/survey-web-app/assets/121783360/87ac8bc5-af83-4fb6-9020-bf55879aec2d)
+
 # Survey Web App Vue JS + Quasar (survey-standalone)
 
 ## Install the dependencies
