@@ -59,7 +59,7 @@
 
 
 <script>
-import { ref, onMounted, defineProps } from 'vue'
+import { nextTick, toRef, toRefs, ref, onMounted, defineProps } from 'vue'
 import { useRoute } from 'vue-router'
 
 
@@ -72,22 +72,28 @@ export default {
     correctAnswer: Number,
   },
   setup(props) {
-    const route = useRoute()
+    
+    // const newProps = toRef(props, 'question')
+    // console.log(newProps.value)
+    // console.log(props.question) // before hot update displays an empty string, after everything is fine
     const question = ref(null)
-    question.value = props.question
+    
 
     const choices = ref([])
-    for (let choice of props.choices) {
-      choices.value.push(choice)  
-    }
+    
     const correctAnswerIndex = ref(null)
-    correctAnswerIndex.value = props.correctAnswer
-
+    
     const imageURL = ref('')
-    const loaderModel = ref(null)
-    onMounted(() => {
-      console.log(route.query)
+
+    nextTick().then(() => {
+      question.value = props.question 
+      for (let choice of props.choices) {
+        choices.value.push(choice)  
+      };
+      correctAnswerIndex.value = props.correctAnswer
     })
+
+    const loaderModel = ref(null)
     return {
       loaderModel,
       imageURL,
@@ -103,7 +109,7 @@ export default {
       onSubmit() {
         console.log(question.value)
         console.log(choices.value)
-        console.log(correctAnswerIndex.value)
+        console.log(correctAnswerIndex.value) 
       },
       onChoiceAdd() {
         choices.value.push(ref(''))
@@ -118,12 +124,11 @@ export default {
         correctAnswerIndex.value = index
       }
     } 
-  },
-  
+  }
 }
 </script>
 
-<style scoped>
+<style scoped> 
 .image-loader {
   margin-bottom: 20px;
 }
