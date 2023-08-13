@@ -1,0 +1,136 @@
+<template>
+  <q-card class="survey-card" flat bordered>
+    <img v-if="loaderModel" :src="imageURL">
+    <q-form
+      @submit="onSubmit"
+      class="q-gutter-md"
+    >
+      <q-file clearable color="orange" standout bottom-slots
+        label="Загрузить изображение для опроса"
+        @update:model-value="onImageLoaded"
+        v-model="loaderModel"
+        class="image-loader"
+      >
+        <template v-slot:prepend>
+          <q-icon name="attach_file" />
+        </template>
+        <template v-slot:hint>
+          Для удаления изображения нажмите на крестик в правой части загрузчика
+        </template>
+      </q-file>
+      <q-input
+        filled
+        v-model="question"
+        label="Заголовок опроса *"
+        hint=""
+        lazy-rules
+        :rules="[ val => val && (val.length > 0 || val.value.length > 0) || 'Пожалуйста, введите что-нибудь']"
+      />
+      
+      <ul class="choices-list bg-grey-2">
+        <q-input 
+          v-for="(choice, index) in choices"
+          filled
+          label="Ответ *"
+          v-model="choices[index]"
+          hint=""
+          lazy-rules
+          :rules="[ val => val && (val.length > 0 || val.value.length > 0) || 'Пожалуйста, введите что-нибудь']"
+          class="choice"
+        >
+          <template v-slot:append>
+            <q-btn round dense flat icon="close" @click="() => {onDeleteChoice(index)}"/>
+          </template>
+          <template v-slot:after>
+            <q-btn :class="{'bg-green-3': index==correctAnswerIndex}" round dense flat icon="check" @click="() => {onSelectCorrectAnswer(index)}"/>
+          </template>
+        </q-input>
+      </ul>
+      <div class="column items-center">
+        <q-btn label="Добавить ответ" color="secondary" class="center" @click="onChoiceAdd"/>
+      </div>
+      <q-separator />
+      <div>
+        <q-btn label="Сохранить" type="submit" color="primary"/>
+      </div>
+    </q-form>
+  </q-card>
+</template>
+
+
+<script>
+import { ref, onMounted, defineProps } from 'vue'
+import { useRoute } from 'vue-router'
+
+
+export default {
+  name: 'SurveyEdit',
+  props: {
+    imageURL: String,
+    question: String,
+    choices: Array,
+    correctAnswer: Number,
+  },
+  setup(props) {
+    const route = useRoute()
+    const question = ref(null)
+    question.value = props.question
+
+    const choices = ref([])
+    for (let choice of props.choices) {
+      choices.value.push(choice)  
+    }
+    const correctAnswerIndex = ref(null)
+    correctAnswerIndex.value = props.correctAnswer
+
+    const imageURL = ref('')
+    const loaderModel = ref(null)
+    onMounted(() => {
+      console.log(route.query)
+    })
+    return {
+      loaderModel,
+      imageURL,
+      question,
+      choices,
+      correctAnswerIndex,
+  
+      onImageLoaded(image) {
+        if (image) {
+          imageURL.value = URL.createObjectURL(image)
+        }
+      },
+      onSubmit() {
+        console.log(question.value)
+        console.log(choices.value)
+        console.log(correctAnswerIndex.value)
+      },
+      onChoiceAdd() {
+        choices.value.push(ref(''))
+      },
+      onDeleteChoice(index) {
+        choices.value.splice(index, 1)
+        if (index == correctAnswerIndex.value || correctAnswerIndex.value >= choices.value.length ) {
+          correctAnswerIndex.value = null
+        }
+      },
+      onSelectCorrectAnswer(index) {
+        correctAnswerIndex.value = index
+      }
+    } 
+  },
+  
+}
+</script>
+
+<style scoped>
+.image-loader {
+  margin-bottom: 20px;
+}
+.choices-list {
+  padding-left: 0px;
+}
+.choice {
+  margin-bottom: 20px;
+}
+</style>

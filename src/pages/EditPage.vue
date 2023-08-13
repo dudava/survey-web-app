@@ -1,13 +1,20 @@
 <template>
-  <q-page class="flex flex-center">
-    EditPage
+  <q-page class="bg-grey-3 column items-center">
+    <SurveyEdit
+    :question="`ты жинжер?`"
+    :correctAnswer="1"
+    :choices="['Да', 'Нет', 'пшел нахуй']"
+    />
   </q-page>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
+import SurveyEdit from 'src/components/SurveyEdit.vue'
 
-export default defineComponent({
-  name: 'EditPage'
-})
+export default {
+  name: 'EditPage',
+  components: {
+    SurveyEdit
+  }
+}
 </script>

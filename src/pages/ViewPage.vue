@@ -4,37 +4,38 @@
     :imageURL="imageURL"
     :question="question"
     :choices="choices"
-    :correctAnswer="correctAnswer"
     />
   </q-page>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import Survey from 'src/components/Survey.vue'
 
-export default defineComponent({
+export default {
   name: 'PreviewPage',
   components: {
     Survey
   },
-  data() {
+  setup() {
+    const route = useRoute()
+    const question = ref('')
+    const choices = ref([])
+    const correctAnswer = ref(null)
+    const imageURL = ref('')
+    onMounted(() => {
+      const queryParams = route.query
+      imageURL.value = queryParams.imageURL
+      question.value = queryParams.question
+      choices.value = queryParams.choices.split('|')
+    })
     return {
-      question: '',
-      choices: [],
-      correctAnswer: '',
-      imageURL: '',
+      question,
+      choices,
+      correctAnswer,
+      imageURL,
     }
-  },
-  mounted() {
-    const queryParams = this.$route.query
-    this.imageURL = queryParams.imageURL
-    this.question = queryParams.question
-    this.choices = queryParams.choices.split('|')
-    this.correctAnswer = this.choices[Number(queryParams.correctAnswer)]
-    
   }
-  
-})
+}
 </script>
