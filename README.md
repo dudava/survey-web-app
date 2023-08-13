@@ -9,9 +9,7 @@
 ## Параметры: 
 **question** - вопрос <br>
 **choices** - варианты ответов через | без пробелов <br>
-**correctAnswer** - индекс правильного ответа (среди choices) начиная с нуля <br>
 **imageURL** - URL изображения для опроса <br>
-
 
 # Survey Web App Vue JS + Quasar (survey-standalone)
 
