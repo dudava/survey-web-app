@@ -25,16 +25,17 @@ export default {
     const choices = ref([])
     const correctAnswer = ref(null)
     const imageURL = ref('')
-    onMounted(() => { 
-      // mount происходит вначале в child, а потом в parent
-      const queryParams = route.query
-      imageURL.value = queryParams.imageURL
-      question.value = queryParams.question
-      if (queryParams.choices) {
-        choices.value = queryParams.choices.split('|')
-      }
-      correctAnswer.value = Number(queryParams.correctAnswer)
-    })
+    
+    const queryParams = route.query
+    imageURL.value = queryParams.imageURL
+    question.value = queryParams.question
+    if (queryParams.choices) {
+      choices.value = queryParams.choices.split('|')
+    }
+    correctAnswer.value = Number(queryParams.correctAnswer)
+
+    // mount происходит вначале в child, а потом в parent
+    
     return {
       question,
       choices,

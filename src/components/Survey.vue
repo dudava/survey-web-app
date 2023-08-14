@@ -6,8 +6,8 @@
     </q-card-section>
     <q-list>
       <q-form @submit.prevent="onSubmit" class="q-gutter-md">
-        <div v-for="choice in choices">
-          <q-radio name="answer" v-model="answer" :val="choice" :label="choice" />
+        <div v-for="(choice, index) in choices">
+          <q-radio name="answer" v-model="answer" :val="index" :label="choice" />
         </div>
         <div>
           <q-btn label="Ответить" type="submit" color="primary"/>
@@ -32,6 +32,7 @@
 </template>
 
 <script>
+import { useQuasar } from 'quasar'
 import { ref } from 'vue'
 
 export default {
@@ -43,18 +44,33 @@ export default {
   },
   setup() {
     const submitResult = ref([])
+    const answer = ref(null)
+    const $q = useQuasar(
+
+    )
     return {
-      answer: ref(''),
+      answer,
       submitResult,
-      onSubmit(evt) {
-        const formData = new FormData(evt.target)
-        const data = []
-
-        for (const [ name, value ] of formData.entries()) {
-          data.push(value)
+      onSubmit() {
+        if (!answer.value && answer.value != 0) {
+          $q.notify({
+            color: 'red-5',
+            textColor: 'white',
+            icon: 'warning',
+            message: 'Необходимо выбрать один вариант ответа'
+          })
         }
-
-        submitResult.value = data
+        else {
+          $q.notify({
+            color: 'green-5',
+            textColor: 'white',
+            icon: 'check',
+            message: 'Ответ принят'
+          })
+          const response = {}
+          response.answer = answer.value
+          console.log(response)
+        }
       },
     }
   },

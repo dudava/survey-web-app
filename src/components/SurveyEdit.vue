@@ -50,9 +50,6 @@
         <q-btn label="Добавить ответ" color="secondary" class="center" @click="onChoiceAdd"/>
       </div>
       <q-separator />
-      <q-banner v-if="correctAnswerNotSelected" inline-actions class="text-white bg-red">
-        Выберите один правильный вариант ответа
-      </q-banner>
       <div>
         <q-btn label="Сохранить" type="submit" color="primary"/>
       </div>
@@ -62,6 +59,7 @@
 
 
 <script>
+import { useQuasar } from 'quasar'
 import { watch, nextTick, toRef, toRefs, ref, onMounted, defineProps } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -78,20 +76,19 @@ export default {
     const question = ref(null)
     const choices = ref([])
     const correctAnswerIndex = ref(null)
-    const correctAnswerNotSelected = ref(false)
     const imageURL = ref('')
-
+    const $q = useQuasar()
     // watch(() => props.question, () => {
     //   question.value = props.question
     // })
     // что-то типо того
-    nextTick().then(() => {
-      question.value = props.question 
-      for (let choice of props.choices) {
-        choices.value.push(choice)  
-      };
-      correctAnswerIndex.value = props.correctAnswer
-    })
+    
+    question.value = props.question 
+    for (let choice of props.choices) {
+      choices.value.push(choice)  
+    };
+    correctAnswerIndex.value = props.correctAnswer
+    
 
     const loaderModel = ref(null)
     return {
@@ -100,7 +97,6 @@ export default {
       question,
       choices,
       correctAnswerIndex,
-      correctAnswerNotSelected,
   
       onImageLoaded(image) {
         if (image) {
@@ -109,10 +105,20 @@ export default {
       },
       onSubmit() {
         if (!correctAnswerIndex.value && correctAnswerIndex.value != 0) {
-          correctAnswerNotSelected.value = true
+          $q.notify({
+            color: 'red-5',
+            textColor: 'white',
+            icon: 'warning',
+            message: 'Необходимо создать и выбрать один правильный ответ'
+          })
         }
         else {
-          correctAnswerNotSelected.value = false
+          $q.notify({
+            color: 'green-5',
+            textColor: 'white',
+            icon: 'check',
+            message: 'Сохранено'
+          })
           const response = {}
           response.question = question.value
           response.choices = choices.value
@@ -129,7 +135,6 @@ export default {
       },
       onSelectCorrectAnswer(index) {
         correctAnswerIndex.value = index
-        
       }
     } 
   }
