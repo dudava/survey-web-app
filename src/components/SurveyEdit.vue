@@ -50,6 +50,9 @@
         <q-btn label="Добавить ответ" color="secondary" class="center" @click="onChoiceAdd"/>
       </div>
       <q-separator />
+      <q-banner v-if="correctAnswerNotSelected" inline-actions class="text-white bg-red">
+        Выберите один правильный вариант ответа
+      </q-banner>
       <div>
         <q-btn label="Сохранить" type="submit" color="primary"/>
       </div>
@@ -59,7 +62,7 @@
 
 
 <script>
-import { nextTick, toRef, toRefs, ref, onMounted, defineProps } from 'vue'
+import { watch, nextTick, toRef, toRefs, ref, onMounted, defineProps } from 'vue'
 import { useRoute } from 'vue-router'
 
 
@@ -72,19 +75,16 @@ export default {
     correctAnswer: Number,
   },
   setup(props) {
-    
-    // const newProps = toRef(props, 'question')
-    // console.log(newProps.value)
-    // console.log(props.question) // before hot update displays an empty string, after everything is fine
     const question = ref(null)
-    
-
     const choices = ref([])
-    
     const correctAnswerIndex = ref(null)
-    
+    const correctAnswerNotSelected = ref(false)
     const imageURL = ref('')
 
+    // watch(() => props.question, () => {
+    //   question.value = props.question
+    // })
+    // что-то типо того
     nextTick().then(() => {
       question.value = props.question 
       for (let choice of props.choices) {
@@ -100,6 +100,7 @@ export default {
       question,
       choices,
       correctAnswerIndex,
+      correctAnswerNotSelected,
   
       onImageLoaded(image) {
         if (image) {
@@ -107,21 +108,28 @@ export default {
         }
       },
       onSubmit() {
-        console.log(question.value)
-        console.log(choices.value)
-        console.log(correctAnswerIndex.value) 
+        if (!correctAnswerIndex.value && correctAnswerIndex.value != 0) {
+          correctAnswerNotSelected.value = true
+        }
+        else {
+          correctAnswerNotSelected.value = false
+          const response = {}
+          response.question = question.value
+          response.choices = choices.value
+          response.correctAnswerIndex = correctAnswerIndex.value
+          console.log(response)
+        }
       },
       onChoiceAdd() {
         choices.value.push(ref(''))
       },
       onDeleteChoice(index) {
         choices.value.splice(index, 1)
-        if (index == correctAnswerIndex.value || correctAnswerIndex.value >= choices.value.length ) {
-          correctAnswerIndex.value = null
-        }
+        correctAnswerIndex.value = null
       },
       onSelectCorrectAnswer(index) {
         correctAnswerIndex.value = index
+        
       }
     } 
   }
