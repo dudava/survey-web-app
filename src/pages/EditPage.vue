@@ -47,6 +47,7 @@ export default {
       imageURL,
 
       sendSurveyChanges(changes) {
+        console.log(changes)
         window.Telegram.WebApp.sendData(JSON.stringify(changes))
       }
     }
