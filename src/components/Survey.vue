@@ -42,7 +42,7 @@ export default {
     question: String,
     choices: Array,
   },
-  setup() {
+  setup(props, context) {
     const submitResult = ref([])
     const answer = ref(null)
     const $q = useQuasar(
@@ -69,7 +69,7 @@ export default {
           })
           const response = {}
           response.answer = answer.value
-          console.log(response)
+          context.emit('answerSelected', response)
         }
       },
     }

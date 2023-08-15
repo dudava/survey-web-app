@@ -5,6 +5,7 @@
     :correctAnswer="correctAnswer"
     :choices="choices"
     :imageURL="`123`"
+    @saveSurveyChanges="(changes) => sendSurveyChanges(changes)"
     />
   </q-page>
 </template>
@@ -13,6 +14,7 @@
 import SurveyEdit from 'src/components/SurveyEdit.vue'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { WebApp } from "@grammyjs/web-app";
 
 export default {
   name: 'EditPage',
@@ -35,12 +37,18 @@ export default {
     correctAnswer.value = Number(queryParams.correctAnswer)
 
     // mount происходит вначале в child, а потом в parent
-    
+    onMounted(() => {
+      WebApp.ready();
+    })
     return {
       question,
       choices,
       correctAnswer,
       imageURL,
+
+      sendSurveyChanges(changes) {
+        window.Telegram.WebApp.sendData(JSON.stringify(changes))
+      }
     }
   }
 }

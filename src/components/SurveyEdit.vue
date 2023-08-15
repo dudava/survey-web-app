@@ -60,19 +60,20 @@
 
 <script>
 import { useQuasar } from 'quasar'
-import { watch, nextTick, toRef, toRefs, ref, onMounted, defineProps } from 'vue'
+import { ref, onMounted, defineProps } from 'vue'
 import { useRoute } from 'vue-router'
 
 
 export default {
   name: 'SurveyEdit',
+  emits: ['saveSurveyChanges'],
   props: {
     imageURL: String,
     question: String,
     choices: Array,
     correctAnswer: Number,
   },
-  setup(props) {
+  setup(props, context) {
     const question = ref(null)
     const choices = ref([])
     const correctAnswerIndex = ref(null)
@@ -89,7 +90,6 @@ export default {
     };
     correctAnswerIndex.value = props.correctAnswer
     
-
     const loaderModel = ref(null)
     return {
       loaderModel,
@@ -97,7 +97,7 @@ export default {
       question,
       choices,
       correctAnswerIndex,
-  
+            
       onImageLoaded(image) {
         if (image) {
           imageURL.value = URL.createObjectURL(image)
@@ -123,7 +123,8 @@ export default {
           response.question = question.value
           response.choices = choices.value
           response.correctAnswerIndex = correctAnswerIndex.value
-          console.log(response)
+          // console.log(response)
+          context.emit('saveSurveyChanges', response)
         }
       },
       onChoiceAdd() {

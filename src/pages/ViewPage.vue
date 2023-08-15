@@ -4,14 +4,20 @@
     :imageURL="imageURL"
     :question="question"
     :choices="choices"
+    @answerSelected="(choice) => sendSelectedAnswer(choice)"
     />
   </q-page>
 </template>
 
 <script>
 import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 import Survey from 'src/components/Survey.vue'
+import { WebApp } from "@grammyjs/web-app";
+
+console.log(WebApp.initData);
+// same as
+console.log(window.Telegram.WebApp.initData);
 
 export default {
   name: 'PreviewPage',
@@ -24,17 +30,24 @@ export default {
     const choices = ref([])
     const correctAnswer = ref(null)
     const imageURL = ref('')
+
+    const queryParams = route.query
+    imageURL.value = queryParams.imageURL
+    question.value = queryParams.question
+    choices.value = queryParams.choices.split('|')
+
     onMounted(() => {
-      const queryParams = route.query
-      imageURL.value = queryParams.imageURL
-      question.value = queryParams.question
-      choices.value = queryParams.choices.split('|')
+      WebApp.ready();
     })
     return {
       question,
       choices,
       correctAnswer,
       imageURL,
+
+      sendSelectedAnswer(choice) {
+        window.Telegram.WebApp.sendData(JSON.stringify(choice))
+      }
     }
   }
 }
