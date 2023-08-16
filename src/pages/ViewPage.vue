@@ -4,6 +4,7 @@
     :imageURL="imageURL"
     :question="question"
     :choices="choices"
+    :surveyId="surveyId"
     @answerSelected="(choice) => sendSelectedAnswer(choice)"
     />
   </q-page>
@@ -29,12 +30,14 @@ export default {
     const question = ref('')
     const choices = ref([])
     const correctAnswer = ref(null)
+    const surveyId = ref(null)
     const imageURL = ref('')
 
     const queryParams = route.query
     imageURL.value = queryParams.imageURL
     question.value = queryParams.question
     choices.value = queryParams.choices.split('|')
+    surveyId.value = Number(queryParams.surveyId)
 
     onMounted(() => {
       WebApp.ready();
@@ -44,6 +47,7 @@ export default {
       choices,
       correctAnswer,
       imageURL,
+      surveyId,
 
       sendSelectedAnswer(choice) {
         window.Telegram.WebApp.sendData(JSON.stringify(choice))

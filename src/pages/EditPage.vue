@@ -4,7 +4,8 @@
     :question="question"
     :correctAnswer="correctAnswer"
     :choices="choices"
-    :imageURL="`123`"
+    :imageURL="imageURL"
+    :surveyId="surveyId"
     @saveSurveyChanges="(changes) => sendSurveyChanges(changes)"
     />
   </q-page>
@@ -23,10 +24,11 @@ export default {
   },
   setup() {
     const route = useRoute()
+    const imageURL = ref('')
     const question = ref('')
     const choices = ref([])
     const correctAnswer = ref(null)
-    const imageURL = ref('')
+    const surveyId = ref(null)
     
     const queryParams = route.query
     imageURL.value = queryParams.imageURL
@@ -35,6 +37,7 @@ export default {
       choices.value = queryParams.choices.split('|')
     }
     correctAnswer.value = Number(queryParams.correctAnswer)
+    surveyId.value = Number(queryParams.surveyId)
 
     // mount происходит вначале в child, а потом в parent
     onMounted(() => {
@@ -45,6 +48,7 @@ export default {
       choices,
       correctAnswer,
       imageURL,
+      surveyId,
 
       sendSurveyChanges(changes) {
         console.log(changes)

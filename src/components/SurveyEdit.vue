@@ -1,11 +1,11 @@
 <template>
   <q-card class="survey-card" flat bordered>
-    <img v-if="loaderModel" :src="imageURL">
+    <img :src="imageURL">
     <q-form
       @submit="onSubmit"
       class="q-gutter-md"
     >
-      <q-file clearable color="orange" standout bottom-slots
+      <q-file color="orange" standout bottom-slots
         label="Загрузить изображение для опроса"
         @update:model-value="onImageLoaded"
         v-model="loaderModel"
@@ -13,6 +13,9 @@
       >
         <template v-slot:prepend>
           <q-icon name="attach_file" />
+        </template>
+        <template v-slot:after>
+          <q-btn round dense flat icon="clear" @click="clearImage()" />
         </template>
         <template v-slot:hint>
           Для удаления изображения нажмите на крестик в правой части загрузчика
@@ -59,9 +62,9 @@
 
 
 <script>
-import { useQuasar } from 'quasar'
-import { ref, onMounted, defineProps } from 'vue'
-import { useRoute } from 'vue-router'
+import { useQuasar, Loading, QSpinnerGears } from 'quasar'
+import { ref, onMounted } from 'vue'
+import { getImageUrlById, uploadImageById, removeOrIgnoreImageById } from 'src/services/imageService'
 
 
 export default {
@@ -72,23 +75,35 @@ export default {
     question: String,
     choices: Array,
     correctAnswer: Number,
-  },
+    surveyId: Number,
+  }, 
   setup(props, context) {
+    const imageURL = ref('')
     const question = ref(null)
     const choices = ref([])
     const correctAnswerIndex = ref(null)
-    const imageURL = ref('')
+    const surveyId = ref(null)
     const $q = useQuasar()
     // watch(() => props.question, () => {
     //   question.value = props.question
     // })
     // что-то типо того
-    
     question.value = props.question 
     for (let choice of props.choices) {
       choices.value.push(choice)  
     };
     correctAnswerIndex.value = props.correctAnswer
+    surveyId.value = props.surveyId
+
+    Loading.show()
+    getImageUrlById(surveyId.value) 
+    .then((response) => {
+      if (response.data) {
+        const url = response.data.signedUrl
+        imageURL.value = url
+      }
+      Loading.hide()
+    })
     
     const loaderModel = ref(null)
     return {
@@ -97,13 +112,22 @@ export default {
       question,
       choices,
       correctAnswerIndex,
-            
-      onImageLoaded(image) {
+      surveyId,
+      
+      async onImageLoaded(image) {
+        console.log(image)
         if (image) {
           imageURL.value = URL.createObjectURL(image)
         }
+        else {
+          imageURL.value = ''
+        }
       },
-      onSubmit() {
+      clearImage() {
+        imageURL.value = null
+        loaderModel.value = null
+      },
+      async onSubmit() {
         if (!correctAnswerIndex.value && correctAnswerIndex.value != 0) {
           $q.notify({
             color: 'red-5',
@@ -118,12 +142,19 @@ export default {
             textColor: 'white',
             icon: 'check',
             message: 'Сохранено'
-          })
+          })  
+          if (loaderModel.value) {
+            let { data, error } = await uploadImageById(surveyId.value, loaderModel.value)
+            console.log(data, error)
+          }
+          else {
+            let { data, error } = await removeOrIgnoreImageById(surveyId.value)
+            console.log(data, error)
+          }
           const response = {}
           response.question = question.value
           response.choices = choices.value
           response.correctAnswerIndex = correctAnswerIndex.value
-          // console.log(response)
           context.emit('saveSurveyChanges', response)
         }
       },

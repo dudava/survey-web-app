@@ -32,8 +32,10 @@
 </template>
 
 <script>
-import { useQuasar } from 'quasar'
+import { useQuasar, Loading } from 'quasar'
 import { ref } from 'vue'
+import { getImageUrlById } from 'src/services/imageService'
+
 
 export default {
   name: 'Survey',
@@ -41,16 +43,29 @@ export default {
     imageURL: String,
     question: String,
     choices: Array,
+    surveyId: Number,
   },
   setup(props, context) {
     const submitResult = ref([])
     const answer = ref(null)
-    const $q = useQuasar(
+    const imageURL = ref('')
+    console.log(props.surveyId)
+    const surveyId = props.surveyId
+    Loading.show()
+    getImageUrlById(surveyId)
+    .then((response) => {
+      if (response.data) {
+        const url = response.data.signedUrl
+        imageURL.value = url
+      }
+      Loading.hide()
+    })
 
-    )
+    const $q = useQuasar()
     return {
       answer,
       submitResult,
+      imageURL,
       onSubmit() {
         if (!answer.value && answer.value != 0) {
           $q.notify({
