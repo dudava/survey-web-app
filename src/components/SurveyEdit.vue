@@ -1,6 +1,6 @@
 <template>
   <q-card class="survey-card" flat bordered>
-    <img :src="imageURL">
+    <img :src="imageURL" :onload="hideLoading" :onerror="hideLoading">
     <q-form
       @submit="onSubmit"
       class="q-gutter-md"
@@ -48,10 +48,19 @@
             <q-btn :class="{'bg-green-3': index==correctAnswerIndex}" round dense flat icon="check" @click="() => {onSelectCorrectAnswer(index)}"/>
           </template>
         </q-input>
-      </ul>
+      </ul>  
       <div class="column items-center">
         <q-btn label="Добавить ответ" color="secondary" class="center" @click="onChoiceAdd"/>
       </div>
+      <q-input
+        id="number-points"
+        v-model.number="numberPoints"
+        type="number"
+        filled
+        style="max-width: 200px"
+        hint="Число баллов за верный ответ"
+        :rules="[ val => (val || (val === 0 || val.value === 0)) && (val >= 0 || val.value >= 0) || 'Пожалуйста, укажите число баллов за верный ответ']"
+      />
       <q-separator />
       <div>
         <q-btn label="Сохранить" type="submit" color="primary"/>
@@ -62,8 +71,8 @@
 
 
 <script>
-import { useQuasar, Loading, QSpinnerGears } from 'quasar'
-import { ref, onMounted } from 'vue'
+import { useQuasar, Loading } from 'quasar'
+import { ref } from 'vue'
 import { getImageUrlById, uploadImageById, removeOrIgnoreImageById } from 'src/services/imageService'
 
 
@@ -71,38 +80,42 @@ export default {
   name: 'SurveyEdit',
   emits: ['saveSurveyChanges'],
   props: {
-    imageURL: String,
-    question: String,
-    choices: Array,
-    correctAnswer: Number,
-    surveyId: Number,
+    surveyData: Object
   }, 
   setup(props, context) {
-    const imageURL = ref('')
-    const question = ref(null)
+    const question = ref('')
     const choices = ref([])
-    const correctAnswerIndex = ref(null)
-    const surveyId = ref(null)
+    const correctAnswer = ref(null)
+    const questionId = ref(null)
+    const imageURL = ref('')
+    const numberPoints = ref(0)
     const $q = useQuasar()
     // watch(() => props.question, () => {
     //   question.value = props.question
     // })
     // что-то типо того
-    question.value = props.question 
-    for (let choice of props.choices) {
+
+    const surveyData = props.surveyData[0]
+    console.log(surveyData)
+    question.value = surveyData.question 
+    for (let choice of surveyData.choices) {
       choices.value.push(choice)  
     };
-    correctAnswerIndex.value = props.correctAnswer
-    surveyId.value = props.surveyId
+    correctAnswer.value = surveyData.correctAnswer
+    questionId.value = surveyData.questionId
+    if (surveyData.numberPoints) {
+      numberPoints.value = surveyData.numberPoints
+    }
+    
 
     Loading.show()
-    getImageUrlById(surveyId.value) 
+    getImageUrlById(questionId.value) 
     .then((response) => {
       if (response.data) {
         const url = response.data.signedUrl
         imageURL.value = url
       }
-      Loading.hide()
+      // Loading.hide()
     })
     
     const loaderModel = ref(null)
@@ -111,8 +124,9 @@ export default {
       imageURL,
       question,
       choices,
-      correctAnswerIndex,
-      surveyId,
+      correctAnswerIndex: correctAnswer,
+      questionId,
+      numberPoints,
       
       async onImageLoaded(image) {
         console.log(image)
@@ -127,8 +141,11 @@ export default {
         imageURL.value = null
         loaderModel.value = null
       },
+      hideLoading() {
+        Loading.hide()
+      },
       async onSubmit() {
-        if (!correctAnswerIndex.value && correctAnswerIndex.value != 0) {
+        if (!correctAnswer.value && correctAnswer.value != 0) {
           $q.notify({
             color: 'red-5',
             textColor: 'white',
@@ -142,20 +159,23 @@ export default {
             textColor: 'white',
             icon: 'check',
             message: 'Сохранено'
-          })  
+          })
+          Loading.show()  
           if (loaderModel.value) {
-            let { data, error } = await uploadImageById(surveyId.value, loaderModel.value)
-            console.log(data, error)
+            let { data, error } = await uploadImageById(questionId.value, loaderModel.value)
+            // console.log(data, error)
           }
-          else {
-            let { data, error } = await removeOrIgnoreImageById(surveyId.value)
-            console.log(data, error)
+          if (!imageURL.value) {
+            let { data, error } = await removeOrIgnoreImageById(questionId.value)
+            // console.log(data, error)
           }
           const response = {}
           response.question = question.value
           response.choices = choices.value
-          response.correctAnswerIndex = correctAnswerIndex.value
+          response.correctAnswer = correctAnswer.value
+          response.numberPoints = numberPoints.value
           context.emit('saveSurveyChanges', response)
+          
         }
       },
       onChoiceAdd() {
@@ -163,10 +183,10 @@ export default {
       },
       onDeleteChoice(index) {
         choices.value.splice(index, 1)
-        correctAnswerIndex.value = null
+        correctAnswer.value = null
       },
       onSelectCorrectAnswer(index) {
-        correctAnswerIndex.value = index
+        correctAnswer.value = index
       }
     } 
   }
@@ -183,4 +203,6 @@ export default {
 .choice {
   margin-bottom: 20px;
 }
+
+
 </style>

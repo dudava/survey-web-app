@@ -1,11 +1,8 @@
 <template>
   <q-page class="bg-grey-3 column items-center">
-    <Survey 
-    :imageURL="imageURL"
-    :question="question"
-    :choices="choices"
-    :surveyId="surveyId"
-    @answerSelected="(choice) => sendSelectedAnswer(choice)"
+    <Survey
+    :surveyData="surveyData"
+    @answersSelected="(answers) => sendSelectedAnswers(answers)"
     />
   </q-page>
 </template>
@@ -27,30 +24,30 @@ export default {
   },
   setup() {
     const route = useRoute()
-    const question = ref('')
-    const choices = ref([])
-    const correctAnswer = ref(null)
-    const surveyId = ref(null)
-    const imageURL = ref('')
-
-    const queryParams = route.query
-    imageURL.value = queryParams.imageURL
-    question.value = queryParams.question
-    choices.value = queryParams.choices.split('|')
-    surveyId.value = Number(queryParams.surveyId)
+    // const question = ref('')
+    // const choices = ref([])
+    // const correctAnswer = ref(null)
+    // const surveyId = ref(null)
+    const surveyData = ref([])
+    
+    surveyData.value = JSON.parse(route.query.json).surveyData
+    // question.value = queryParams.question
+    // choices.value = queryParams.choices
+    // surveyId.value = Number(queryParams.surveyId)
 
     onMounted(() => {
       WebApp.ready();
     })
     return {
-      question,
-      choices,
-      correctAnswer,
-      imageURL,
-      surveyId,
+      // question,
+      // choices,
+      // correctAnswer,
+      // surveyId,
+      surveyData,
 
-      sendSelectedAnswer(choice) {
-        window.Telegram.WebApp.sendData(JSON.stringify(choice))
+      sendSelectedAnswers(answers) {
+        console.log(JSON.stringify(answers))
+        window.Telegram.WebApp.sendData(JSON.stringify(answers))
       }
     }
   }
