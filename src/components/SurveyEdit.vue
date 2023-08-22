@@ -24,10 +24,12 @@
       <q-input
         filled
         v-model="question"
-        label="Заголовок опроса *"
+        label="Заголовок вопроса *"
         hint=""
         lazy-rules
         :rules="[ val => val && (val.length > 0 || val.value.length > 0) || 'Пожалуйста, введите что-нибудь']"
+        counter
+        maxlength="64"
       />
       
       <ul class="choices-list bg-grey-2">
@@ -39,13 +41,15 @@
           hint=""
           lazy-rules
           :rules="[ val => val && (val.length > 0 || val.value.length > 0) || 'Пожалуйста, введите что-нибудь']"
+          counter
+          maxlength="32"
           class="choice"
         >
           <template v-slot:append>
             <q-btn round dense flat icon="close" @click="() => {onDeleteChoice(index)}"/>
           </template>
           <template v-slot:after>
-            <q-btn :class="{'bg-green-3': index==correctAnswerIndex}" round dense flat icon="check" @click="() => {onSelectCorrectAnswer(index)}"/>
+            <q-btn :class="{'bg-green-3': index==correctAnswer}" round dense flat icon="check" @click="() => {onSelectCorrectAnswer(index)}"/>
           </template>
         </q-input>
       </ul>  
@@ -107,7 +111,7 @@ export default {
       numberPoints.value = surveyData.numberPoints
     }
     
-
+    const loaderModel = ref(null)
     Loading.show()
     getImageUrlById(questionId.value) 
     .then((response) => {
@@ -117,19 +121,32 @@ export default {
       }
       // Loading.hide()
     })
+    function checkUniqueChoices() {
+      const choicesSet = new Set(choices.value)
+      return choices.value.length === choicesSet.size
+    }
+
+    function showWarning(text) {
+      $q.notify({
+        color: 'red-5',
+        textColor: 'white',
+        icon: 'warning',
+        message: text
+      })
+    }
     
-    const loaderModel = ref(null)
     return {
       loaderModel,
       imageURL,
       question,
       choices,
-      correctAnswerIndex: correctAnswer,
+      correctAnswer: correctAnswer,
       questionId,
       numberPoints,
-      
+      checkUniqueChoices,
+      showWarning,
+
       async onImageLoaded(image) {
-        console.log(image)
         if (image) {
           imageURL.value = URL.createObjectURL(image)
         }
@@ -145,14 +162,13 @@ export default {
         Loading.hide()
       },
       async onSubmit() {
-        if (!correctAnswer.value && correctAnswer.value != 0) {
-          $q.notify({
-            color: 'red-5',
-            textColor: 'white',
-            icon: 'warning',
-            message: 'Необходимо создать и выбрать один правильный ответ'
-          })
+        if (!correctAnswer.value && correctAnswer.value !== 0) {
+          showWarning('Необходимо создать и выбрать как минимум один правильный ответ')
         }
+        else if (!checkUniqueChoices()) {
+          showWarning('Все варианты ответов должны быть разными')
+        }
+        
         else {
           $q.notify({
             color: 'green-5',
@@ -175,7 +191,6 @@ export default {
           response.correctAnswer = correctAnswer.value
           response.numberPoints = numberPoints.value
           context.emit('saveSurveyChanges', response)
-          
         }
       },
       onChoiceAdd() {

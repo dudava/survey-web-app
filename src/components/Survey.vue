@@ -24,14 +24,11 @@
     <div class="column items-center q-my-xl">
       <q-btn label="Сохранить результат" type="submit" color="primary" size="lg"/>
     </div>
-  </q-form>
-  
-    
-  
+  </q-form>  
 </template>
 
 <script>
-import { useQuasar, Loading } from 'quasar'
+import { useQuasar } from 'quasar'
 import { ref } from 'vue'
 import { setQuestionImageUrl } from 'src/services/imageService'
 
@@ -52,8 +49,6 @@ export default {
       question.imageUrl = ref('')
       question.answer = ref(null)
       setQuestionImageUrl(question, question.questionId)
-    
-      
     }
     // const imageURL = ref('')
     // const surveyId = props.surveyId
