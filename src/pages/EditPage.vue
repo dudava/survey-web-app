@@ -11,7 +11,7 @@
 import SurveyEdit from 'src/components/SurveyEdit.vue'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { WebApp } from "@grammyjs/web-app";
+// import { WebApp } from "@grammyjs/web-app";
 import { Loading } from 'quasar';
 
 export default {
@@ -26,17 +26,20 @@ export default {
 
     // mount происходит вначале в child, а потом в parent
     onMounted(() => {
-      console.log(WebApp.version)
+      // console.log(WebApp.version)
       // WebApp.ready();
-      WebApp.expand()
+      window.Telegram.WebApp.MainButton.show()
+      window.Telegram.WebApp.MainButton.text = "Сохранить вопрос"
+      // WebApp.expand()
     })
     return {
       surveyData,
 
       sendSurveyChanges(changes) {
-        console.log(JSON.stringify(changes))
-        WebApp.sendData(JSON.stringify(changes))
+        // console.log(JSON.stringify(changes))
         Loading.hide()
+        
+        
       }
     }
   }

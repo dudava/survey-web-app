@@ -1,5 +1,5 @@
 <template>
-  <q-form @submit.prevent="onSubmit" >
+  <q-form>
     <q-card class="survey-card" flat bordered v-for="question in surveyData">
       <div class="column items-center">
         <q-spinner
@@ -21,9 +21,9 @@
         </div>
       </q-list>
     </q-card>
-    <div class="column items-center q-my-xl">
+    <!-- <div class="column items-center q-my-xl">
       <q-btn label="Сохранить результат" type="submit" color="primary" size="lg"/>
-    </div>
+    </div> -->
   </q-form>  
 </template>
 
@@ -41,6 +41,7 @@ export default {
   setup(props, context) {
     const surveyData = ref(null)
     surveyData.value = props.surveyData
+    const $q = useQuasar()
     // const answer = ref(null)
 
     for (let question of surveyData.value) {
@@ -52,6 +53,7 @@ export default {
     }
     // const imageURL = ref('')
     // const surveyId = props.surveyId
+    
     // Loading.show()
     function checkAnswers() {
       for (let question of surveyData.value) {
@@ -63,38 +65,38 @@ export default {
       return true
     }
 
-    const $q = useQuasar()
+    window.Telegram.WebApp.onEvent('mainButtonClicked', async function() {
+      if (!checkAnswers()) {
+        $q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'warning',
+          message: 'Необходимо выбрать все варианты ответа'
+        })
+      }
+      else {
+        
+        $q.notify({
+          color: 'green-5',
+          icon: 'check',
+          message: 'Ответ принят',
+          textColor: 'white',
+        })
+        console.log(surveyData.value)
+        const response = {}
+        for (let question of surveyData.value) {
+          response[question.questionId] = question.answer
+        }
+        console.log(response)
+        // response.answer = answer.value
+        window.Telegram.WebApp.sendData(JSON.stringify(response))
+        // context.emit('answersSelected', response)
+      }
+    })
+
     return {
       surveyData,
       checkAnswers,
-      
-      onSubmit() {
-        if (!checkAnswers()) {
-          $q.notify({
-            color: 'red-5',
-            textColor: 'white',
-            icon: 'warning',
-            message: 'Необходимо выбрать все варианты ответа'
-          })
-        }
-        else {
-          $q.notify({
-            color: 'green-5',
-            textColor: 'white',
-            icon: 'check',
-            message: 'Ответ принят'
-          })
-          console.log(surveyData.value)
-          const response = {}
-          for (let question of surveyData.value) {
-            response[question.questionId] = question.answer
-          }
-          console.log(response)
-          // response.answer = answer.value
-          context.emit('answersSelected', response)
-        }
-      },
-
     }
   },
   

@@ -11,11 +11,6 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import Survey from 'src/components/Survey.vue'
-import { WebApp } from "@grammyjs/web-app";
-
-console.log(WebApp.initData);
-// same as
-console.log(window.Telegram.WebApp.initData);
 
 export default {
   name: 'PreviewPage',
@@ -24,19 +19,14 @@ export default {
   },
   setup() {
     const route = useRoute()
-    // const question = ref('')
-    // const choices = ref([])
-    // const correctAnswer = ref(null)
-    // const surveyId = ref(null)
     const surveyData = ref([])
-    
     surveyData.value = JSON.parse(route.query.json).surveyData
-    // question.value = queryParams.question
-    // choices.value = queryParams.choices
-    // surveyId.value = Number(queryParams.surveyId)
+    
 
     onMounted(() => {
-      WebApp.ready();
+      // WebApp.ready();
+      window.Telegram.WebApp.MainButton.show()
+      window.Telegram.WebApp.MainButton.text = "Отправить"
     })
     return {
       // question,

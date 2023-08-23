@@ -2,7 +2,7 @@
   <q-card class="survey-card" flat bordered>
     <img :src="imageURL" :onload="hideLoading" :onerror="hideLoading">
     <q-form
-      @submit="onSubmit"
+      ref="questionForm"
       class="q-gutter-md"
     >
       <q-file color="orange" standout bottom-slots
@@ -66,9 +66,9 @@
         :rules="[ val => (val || (val === 0 || val.value === 0)) && (val >= 0 || val.value >= 0) || 'Пожалуйста, укажите число баллов за верный ответ']"
       />
       <q-separator />
-      <div>
+      <!-- <div>
         <q-btn label="Сохранить" type="submit" color="primary"/>
-      </div>
+      </div> -->
     </q-form>
   </q-card>
 </template>
@@ -93,6 +93,7 @@ export default {
     const questionId = ref(null)
     const imageURL = ref('')
     const numberPoints = ref(0)
+    const questionForm = ref(null)
     const $q = useQuasar()
     // watch(() => props.question, () => {
     //   question.value = props.question
@@ -135,6 +136,44 @@ export default {
       })
     }
     
+    window.Telegram.WebApp.onEvent('mainButtonClicked', async function(){
+      if (!correctAnswer.value && correctAnswer.value !== 0) {
+        showWarning('Необходимо создать и выбрать как минимум один правильный ответ')
+      }
+      else if (!checkUniqueChoices()) {
+        showWarning('Все варианты ответов должны быть разными')
+      }
+      
+      else {
+        questionForm.value.validate().then(async function(success){
+          if (success) {
+            Loading.show()  
+            if (loaderModel.value) {
+              let { data, error } = await uploadImageById(questionId.value, loaderModel.value)
+              // console.log(data, error)
+            }
+            if (!imageURL.value) {
+              let { data, error } = await removeOrIgnoreImageById(questionId.value)
+              // console.log(data, error)
+            }
+            const response = {}
+            response.question = question.value
+            response.choices = choices.value
+            response.correctAnswer = correctAnswer.value
+            response.numberPoints = numberPoints.value
+            console.log(response)
+            window.Telegram.WebApp.sendData(JSON.stringify(response))
+            $q.notify({
+              color: 'green-5',
+              textColor: 'white',
+              icon: 'check',
+              message: 'Сохранено'
+            })
+          }
+        })
+      }
+    })
+
     return {
       loaderModel,
       imageURL,
@@ -143,6 +182,7 @@ export default {
       correctAnswer: correctAnswer,
       questionId,
       numberPoints,
+      questionForm,
       checkUniqueChoices,
       showWarning,
 
@@ -161,38 +201,7 @@ export default {
       hideLoading() {
         Loading.hide()
       },
-      async onSubmit() {
-        if (!correctAnswer.value && correctAnswer.value !== 0) {
-          showWarning('Необходимо создать и выбрать как минимум один правильный ответ')
-        }
-        else if (!checkUniqueChoices()) {
-          showWarning('Все варианты ответов должны быть разными')
-        }
-        
-        else {
-          $q.notify({
-            color: 'green-5',
-            textColor: 'white',
-            icon: 'check',
-            message: 'Сохранено'
-          })
-          Loading.show()  
-          if (loaderModel.value) {
-            let { data, error } = await uploadImageById(questionId.value, loaderModel.value)
-            // console.log(data, error)
-          }
-          if (!imageURL.value) {
-            let { data, error } = await removeOrIgnoreImageById(questionId.value)
-            // console.log(data, error)
-          }
-          const response = {}
-          response.question = question.value
-          response.choices = choices.value
-          response.correctAnswer = correctAnswer.value
-          response.numberPoints = numberPoints.value
-          context.emit('saveSurveyChanges', response)
-        }
-      },
+      
       onChoiceAdd() {
         choices.value.push(ref(''))
       },
